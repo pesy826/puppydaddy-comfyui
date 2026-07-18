@@ -1,0 +1,42 @@
+{
+  "manifestVersion": 1,
+  "id": "com.puppydaddy.comfyui",
+  "name": "ComfyUI Control",
+  "version": "0.1.0",
+  "description": "Discover, launch, monitor, stop, and restart a local ComfyUI instance from puppyDaddy.",
+  "publisher": "puppydaddy",
+  "license": "MIT",
+  "repository": "https://github.com/pesy826/puppydaddy-comfyui",
+  "engines": {
+    "puppydaddy": ">=0.1.0"
+  },
+  "main": "src/main.js",
+  "contributes": {
+    "views": [
+      {
+        "id": "com.puppydaddy.comfyui.console",
+        "title": "ComfyUI",
+        "displayMode": "full",
+        "entry": "src/view.html",
+        "messageChannels": [
+          {
+            "id": "comfyui.request",
+            "direction": "viewToHost"
+          },
+          {
+            "id": "comfyui.state",
+            "direction": "hostToView"
+          },
+          {
+            "id": "comfyui.log",
+            "direction": "hostToView"
+          },
+          {
+            "id": "comfyui.result",
+            "direction": "hostToView"
+          }
+        ]
+      }
+    ]
+  }
+}
