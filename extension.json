@@ -1,9 +1,9 @@
 {
   "manifestVersion": 1,
   "id": "com.puppydaddy.comfyui",
-  "name": "ComfyUI Studio",
+  "name": "ComfyUI Control",
   "version": "0.2.0",
-  "description": "Agent-native ComfyUI studio with shared PD and manual control over models, samplers, workflows, queue progress, cancellation, and generated images.",
+  "description": "Launch, monitor, stop, and restart a user-selected local ComfyUI instance from puppyDaddy.",
   "publisher": "puppydaddy",
   "license": "MIT",
   "repository": "https://github.com/pesy826/puppydaddy-comfyui",
