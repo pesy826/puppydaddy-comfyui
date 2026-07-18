@@ -205,22 +205,32 @@ function ordinaryFile(file) {
   }
 }
 
-function discoverLaunch(rootValue) {
-  const root = normalizeRoot(rootValue)
+function resolveLaunch(rootValue) {
+  const selectedRoot = normalizeRoot(rootValue)
   const isWindows = process.platform === 'win32'
   const candidates = []
 
-  const portableMain = path.join(root, 'ComfyUI', 'main.py')
-  if (isWindows) {
+  // Windows portable 常见下载包会额外套一层发行目录，例如：
+  // <用户填写目录>/ComfyUI_windows_portable/python_embeded + ComfyUI。
+  // 这里只接受固定已知子目录，不做磁盘扫描或模糊“自动识别”。
+  const portableRoots = isWindows
+    ? [
+        selectedRoot,
+        path.join(selectedRoot, 'ComfyUI_windows_portable'),
+      ]
+    : []
+  for (const portableRoot of portableRoots) {
     candidates.push({
       kind: 'windows-portable',
-      executable: path.join(root, 'python_embeded', 'python.exe'),
-      main: portableMain,
-      cwd: path.join(root, 'ComfyUI'),
+      executable: path.join(portableRoot, 'python_embeded', 'python.exe'),
+      main: path.join(portableRoot, 'ComfyUI', 'main.py'),
+      cwd: path.join(portableRoot, 'ComfyUI'),
       extraArgs: ['--windows-standalone-build'],
+      root: selectedRoot,
     })
   }
 
+  const root = selectedRoot
   const directMain = path.join(root, 'main.py')
   if (isWindows) {
     candidates.push(
@@ -269,7 +279,7 @@ function discoverLaunch(rootValue) {
     (candidate) =>
       ordinaryFile(candidate.executable) && ordinaryFile(candidate.main),
   )
-  if (selected) return { ...selected, root }
+  if (selected) return { ...selected, root: selected.root ?? root }
 
   if (ordinaryFile(directMain)) {
     return {
@@ -283,7 +293,7 @@ function discoverLaunch(rootValue) {
   }
 
   throw new Error(
-    '未找到可启动的 ComfyUI。请选择包含 main.py 的 ComfyUI 目录，或 Windows portable 的上级目录。',
+    '未找到可启动的 ComfyUI。请填写包含 main.py 的 ComfyUI 目录、Windows portable 目录，或直接包含 ComfyUI_windows_portable 的上级目录。',
   )
 }
 
@@ -417,7 +427,7 @@ async function stopProcess() {
 
 async function startProcess(rootValue, portValue) {
   if (child) throw new Error('ComfyUI 已在此扩展中运行')
-  const launch = discoverLaunch(rootValue)
+  const launch = resolveLaunch(rootValue)
   const port = normalizePort(portValue)
   writeConfig({ rootPath: launch.root, port })
 
@@ -533,18 +543,6 @@ async function handleRequest(message) {
       result(requestId, true, '状态已同步')
       return
     }
-    if (action === 'discover') {
-      const launch = discoverLaunch(payload.rootPath)
-      state.rootPath = launch.root
-      state.launchKind = launch.kind
-      state.port = normalizePort(payload.port ?? state.port)
-      state.url = `http://127.0.0.1:${state.port}`
-      state.error = null
-      writeConfig({ rootPath: state.rootPath, port: state.port })
-      publishState()
-      result(requestId, true, `已识别 ${launch.kind}`)
-      return
-    }
     if (action === 'start') {
       await serialize(() =>
         startProcess(payload.rootPath ?? state.rootPath, payload.port ?? state.port),
@@ -577,7 +575,7 @@ async function handleRequest(message) {
     throw new Error('未知 ComfyUI 操作')
   } catch (error) {
     state.error = safeError(error)
-    if (!child && !['discover', 'snapshot', 'clearLogs'].includes(action)) {
+    if (!child && !['snapshot', 'clearLogs'].includes(action)) {
       state.phase = 'error'
     }
     appendLog('stderr', `${state.error}\n`)
@@ -593,7 +591,7 @@ exports.activate = async function activate(extensionContext) {
   state.port = config.port
   state.url = `http://127.0.0.1:${config.port}`
   context.onViewMessage((message) => handleRequest(message))
-  appendLog('system', 'ComfyUI Control Host 已就绪。请选择或确认本机 ComfyUI 目录。\n')
+  appendLog('system', 'ComfyUI Control Host 已就绪。请填写或确认本机 ComfyUI 目录。\n')
 }
 
 exports.deactivate = async function deactivate() {
