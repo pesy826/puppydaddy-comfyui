@@ -3,77 +3,973 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ComfyUI Control</title>
+  <title>ComfyUI Studio</title>
   <style>
-    :root{color-scheme:light;--bg:#f5f7fb;--panel:#fff;--line:#dce2ec;--ink:#182033;--muted:#68748a;--accent:#315fd6;--accent2:#2449a8;--ok:#16835d;--warn:#b76b12;--danger:#c43c4e;--terminal:#111827;--termInk:#dbe5f5}
-    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,system-ui,sans-serif}button,input{font:inherit}button{cursor:pointer}.app{height:100vh;display:grid;grid-template-rows:auto 1fr;overflow:hidden}.top{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 26px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.92)}.brand{display:flex;align-items:center;gap:13px}.mark{width:34px;height:34px;border-radius:10px;background:var(--accent);display:grid;place-items:center;color:#fff;font-weight:800}.title{font-size:18px;font-weight:750}.sub{font-size:12px;color:var(--muted)}.status{display:flex;align-items:center;gap:9px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}.dot{width:8px;height:8px;border-radius:50%;background:#9aa5b6}.dot.running{background:var(--ok);box-shadow:0 0 0 4px #16835d18}.dot.error{background:var(--danger)}.main{min-height:0;display:grid;grid-template-columns:minmax(300px,390px) 1fr;gap:18px;padding:18px}.side,.console{min-height:0;border:1px solid var(--line);border-radius:15px;background:var(--panel);overflow:hidden}.side{padding:20px;overflow:auto}.eyebrow{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}h2{font-size:16px;margin:5px 0 16px}.field{margin:14px 0}.field label{display:block;margin-bottom:6px;font-size:11px;font-weight:700;color:var(--muted)}input{width:100%;height:40px;border:1px solid var(--line);border-radius:9px;padding:0 11px;color:var(--ink);outline:none}input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #315fd617}.hint{margin-top:6px;color:var(--muted);font-size:11px;line-height:1.45}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}.btn{height:38px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink);font-weight:700}.btn:hover{border-color:#aab7ca}.btn.primary{grid-column:1/-1;background:var(--accent);border-color:var(--accent);color:#fff}.btn.primary:hover{background:var(--accent2)}.btn.danger{color:var(--danger)}.btn:disabled{cursor:not-allowed;opacity:.45}.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px}.fact{padding:10px;border:1px solid var(--line);border-radius:9px;background:#f9fafc}.fact span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase}.fact b{display:block;margin-top:3px;font:600 12px ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis}.notice{min-height:38px;margin-top:14px;padding:9px 10px;border-radius:9px;background:#f3f6fb;color:var(--muted);font-size:12px}.notice.error{background:#fff0f2;color:var(--danger)}.console{display:grid;grid-template-rows:auto 1fr;background:var(--terminal);border-color:#293247}.consoleHead{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;border-bottom:1px solid #293247;color:#c8d2e3}.consoleHead button{border:0;background:transparent;color:#9aa8bd;font-size:12px}.logs{overflow:auto;padding:15px;color:var(--termInk);font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;word-break:break-word}.line.stderr{color:#ff9fab}.line.system{color:#87aef8}.empty{color:#718097}@media(max-width:800px){.main{grid-template-columns:1fr;overflow:auto}.side{min-height:max-content}.console{min-height:420px}.app{overflow:auto}}
+    :root {
+      color-scheme: light;
+      --bg: #f3f5f9;
+      --panel: #ffffff;
+      --panel-subtle: #f8f9fc;
+      --line: #dce2ec;
+      --line-strong: #bcc7d8;
+      --ink: #182033;
+      --muted: #68748a;
+      --accent: #315fd6;
+      --accent-strong: #2449a8;
+      --accent-soft: #edf2ff;
+      --ok: #16835d;
+      --ok-soft: #e9f7f1;
+      --warn: #a86413;
+      --warn-soft: #fff5e7;
+      --danger: #c43c4e;
+      --danger-soft: #fff0f2;
+      --terminal: #111827;
+      --terminal-line: #2a3447;
+      --terminal-ink: #dbe5f5;
+      --shadow: 0 12px 34px rgba(32, 48, 82, .08);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      font: 13px/1.45 Inter, "Segoe UI", system-ui, sans-serif;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 3px solid rgba(49, 95, 214, .18);
+      outline-offset: 1px;
+      border-color: var(--accent);
+    }
+
+    .app {
+      height: 100vh;
+      display: grid;
+      grid-template-rows: 58px minmax(0, 1fr);
+      overflow: hidden;
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .94);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
+    .mark {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      color: #fff;
+      background: var(--accent);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      box-shadow: inset 0 1px rgba(255, 255, 255, .28);
+    }
+    .brand-copy { min-width: 0; }
+    .title { font-size: 16px; font-weight: 760; letter-spacing: -.015em; }
+    .sub { color: var(--muted); font-size: 11px; white-space: nowrap; }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fff;
+    }
+    .dot { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: #9aa5b6; }
+    .dot.running { background: var(--ok); box-shadow: 0 0 0 4px rgba(22, 131, 93, .1); }
+    .dot.error { background: var(--danger); }
+    .status strong { font-size: 12px; }
+    .agent-badge {
+      margin-left: 3px;
+      padding: 2px 6px;
+      border-radius: 5px;
+      color: var(--accent);
+      background: var(--accent-soft);
+      font: 700 9px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .08em;
+    }
+
+    .workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(230px, 270px) minmax(360px, 1fr) minmax(280px, 330px);
+      gap: 12px;
+      padding: 12px;
+    }
+    .column {
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .panel {
+      min-width: 0;
+      min-height: 0;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .panel.scroll { overflow: auto; }
+    .panel-head {
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .96);
+    }
+    .panel-title { font-size: 12px; font-weight: 760; }
+    .eyebrow {
+      display: block;
+      color: var(--accent);
+      font: 800 9px/1.3 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .panel-body { padding: 14px; }
+    .grow { flex: 1 1 auto; }
+    .shrink { flex: 0 0 auto; }
+
+    .field { margin-bottom: 11px; }
+    .field:last-child { margin-bottom: 0; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+    .field-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 760;
+      letter-spacing: .025em;
+    }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+      transition: border-color .14s ease, box-shadow .14s ease;
+    }
+    input, select { height: 36px; padding: 0 9px; }
+    textarea {
+      min-height: 76px;
+      padding: 9px 10px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    textarea.workflow {
+      min-height: 190px;
+      font: 11px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace;
+      tab-size: 2;
+    }
+    input:hover, select:hover, textarea:hover { border-color: var(--line-strong); }
+    .hint { margin-top: 5px; color: var(--muted); font-size: 10px; line-height: 1.45; }
+
+    .btn {
+      min-height: 34px;
+      padding: 0 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: #fff;
+      font-size: 11px;
+      font-weight: 750;
+      white-space: nowrap;
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+    }
+    .btn:hover:not(:disabled) { border-color: #aab7ca; transform: translateY(-1px); }
+    .btn:active:not(:disabled) { transform: scale(.98); }
+    .btn.primary { color: #fff; border-color: var(--accent); background: var(--accent); }
+    .btn.primary:hover:not(:disabled) { background: var(--accent-strong); }
+    .btn.quiet { color: var(--muted); background: var(--panel-subtle); }
+    .btn.danger { color: var(--danger); }
+    .btn.small { min-height: 29px; padding: 0 8px; font-size: 10px; }
+    .btn:disabled { cursor: not-allowed; opacity: .45; transform: none; }
+
+    .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .button-grid .wide { grid-column: 1 / -1; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 7px; }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding: 3px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--panel-subtle);
+    }
+    .segment {
+      height: 30px;
+      border: 0;
+      border-radius: 6px;
+      color: var(--muted);
+      background: transparent;
+      font-size: 10px;
+      font-weight: 760;
+    }
+    .segment.active { color: var(--accent); background: #fff; box-shadow: 0 1px 4px rgba(32, 48, 82, .1); }
+
+    .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 13px; }
+    .fact {
+      min-width: 0;
+      padding: 8px 9px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-subtle);
+    }
+    .fact span { display: block; color: var(--muted); font-size: 9px; text-transform: uppercase; }
+    .fact b {
+      display: block;
+      overflow: hidden;
+      margin-top: 2px;
+      font: 650 10px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .notice {
+      min-height: 34px;
+      margin-top: 11px;
+      padding: 8px 9px;
+      border-radius: 8px;
+      color: var(--muted);
+      background: #f3f6fb;
+      font-size: 10px;
+    }
+    .notice.success { color: var(--ok); background: var(--ok-soft); }
+    .notice.error { color: var(--danger); background: var(--danger-soft); }
+
+    .sync-card {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 9px;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 9px;
+      border: 1px solid #cfd9f0;
+      border-radius: 9px;
+      background: var(--accent-soft);
+    }
+    .sync-icon {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 7px;
+      color: #fff;
+      background: var(--accent);
+      font: 800 10px/1 ui-monospace, monospace;
+    }
+    .sync-card strong { display: block; font-size: 10px; }
+    .sync-card span { display: block; margin-top: 1px; color: var(--muted); font-size: 9px; }
+
+    .queue-list, .output-list { display: flex; flex-direction: column; gap: 7px; }
+    .job {
+      padding: 9px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--panel-subtle);
+    }
+    .job.active { border-color: #aabce9; background: #f6f8ff; }
+    .job-top { display: flex; align-items: center; justify-content: space-between; gap: 7px; }
+    .job-id {
+      overflow: hidden;
+      font: 650 9px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .pill {
+      flex: 0 0 auto;
+      padding: 2px 6px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: #e9edf4;
+      font-size: 9px;
+      font-weight: 760;
+    }
+    .pill.running, .pill.finalizing { color: var(--accent); background: var(--accent-soft); }
+    .pill.completed { color: var(--ok); background: var(--ok-soft); }
+    .pill.error, .pill.cancelled { color: var(--danger); background: var(--danger-soft); }
+    .progress {
+      height: 4px;
+      margin-top: 7px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e1e6ef;
+    }
+    .progress i { display: block; width: 0; height: 100%; background: var(--accent); transition: width .2s ease; }
+    .job-meta { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; color: var(--muted); font-size: 9px; }
+    .job-error { margin-top: 6px; color: var(--danger); font-size: 9px; word-break: break-word; }
+
+    .output-card {
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+      padding: 7px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--panel-subtle);
+    }
+    .output-card img {
+      width: 58px;
+      height: 58px;
+      display: block;
+      border-radius: 7px;
+      object-fit: cover;
+      background: #e6eaf1;
+    }
+    .output-name {
+      overflow: hidden;
+      font: 650 9px/1.45 ui-monospace, SFMono-Regular, Consolas, monospace;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .output-meta { margin-top: 3px; color: var(--muted); font-size: 9px; }
+    .empty {
+      padding: 18px 10px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 10px;
+    }
+
+    .terminal-panel { flex: 0 0 188px; display: grid; grid-template-rows: 38px minmax(0, 1fr); background: var(--terminal); border-color: var(--terminal-line); }
+    .terminal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 11px;
+      border-bottom: 1px solid var(--terminal-line);
+      color: #c8d2e3;
+      font: 700 9px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+      letter-spacing: .06em;
+    }
+    .terminal-head button { border: 0; color: #98a7bd; background: transparent; font-size: 9px; }
+    .logs {
+      overflow: auto;
+      padding: 10px;
+      color: var(--terminal-ink);
+      font: 10px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .line.stderr { color: #ff9fab; }
+    .line.system { color: #87aef8; }
+
+    .hidden { display: none !important; }
+    .loading::after {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin-left: 6px;
+      border: 2px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      vertical-align: -1px;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+    @media (max-width: 980px) {
+      body { overflow: auto; }
+      .app { height: auto; min-height: 100vh; overflow: visible; }
+      .workspace { grid-template-columns: 250px minmax(360px, 1fr); }
+      .right-column { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; }
+      .terminal-panel { min-height: 220px; }
+    }
+    @media (max-width: 700px) {
+      .workspace { grid-template-columns: 1fr; }
+      .right-column { grid-column: auto; display: flex; }
+      .field-grid-4 { grid-template-columns: 1fr 1fr; }
+      .sub, .agent-badge { display: none; }
+    }
   </style>
 </head>
 <body>
-<div class="app">
-  <header class="top">
-    <div class="brand"><div class="mark">C</div><div><div class="title">ComfyUI Control</div><div class="sub">本机进程与终端 · 由 Extension Host 管理</div></div></div>
-    <div class="status"><i id="dot" class="dot"></i><strong id="phase">等待状态</strong><span id="ready" class="sub"></span></div>
-  </header>
-  <main class="main">
-    <section class="side">
-      <div class="eyebrow">Local runtime</div><h2>启动配置</h2>
-      <div class="field"><label for="root">ComfyUI 目录</label><input id="root" spellcheck="false" placeholder="H:\ComfyUI 或 H:\ComfyUI_windows_portable"><div class="hint">请手动填写 ComfyUI 目录、Windows portable 目录，或直接包含 ComfyUI_windows_portable 的上级目录。</div></div>
-      <div class="field"><label for="port">监听端口</label><input id="port" type="number" min="1024" max="65535" value="8188"></div>
-      <div class="actions"><button id="start" class="btn primary">启动 ComfyUI</button><button id="stop" class="btn danger">停止</button><button id="restart" class="btn">重启</button></div>
-      <div class="facts">
-        <div class="fact"><span>PID</span><b id="pid">—</b></div><div class="fact"><span>Launch</span><b id="kind">—</b></div>
-        <div class="fact"><span>API</span><b id="url">—</b></div><div class="fact"><span>Exit code</span><b id="exit">—</b></div>
+  <div class="app">
+    <header class="top">
+      <div class="brand">
+        <div class="mark">C</div>
+        <div class="brand-copy">
+          <div class="title">ComfyUI Studio</div>
+          <div class="sub">同一套模型、参数与队列，由你和 puppyDaddy 共同控制</div>
+        </div>
       </div>
-      <div id="notice" class="notice">正在连接 Extension Host…</div>
-    </section>
-    <section class="console"><div class="consoleHead"><span>COMFYUI TERMINAL · STDOUT / STDERR</span><button id="clear">清空日志</button></div><div id="logs" class="logs"><span class="empty">等待 Host 日志…</span></div></section>
-  </main>
-</div>
-<script>
-(() => {
-  'use strict'
-  const api = window.puppyExtension
-  const $ = (id) => document.getElementById(id)
-  let state = { phase: 'stopped', logs: [] }
-  let seq = 0
-  const pending = new Set()
-  const labels = {stopped:'已停止',starting:'启动中',running:'运行中',stopping:'停止中',error:'错误'}
-  function request(action, extra={}) {
-    const requestId = `view_${Date.now().toString(36)}_${++seq}`
-    pending.add(requestId); render()
-    api.postMessage('comfyui.request',{requestId,action,...extra})
-  }
-  function setNotice(text,error=false){$('notice').textContent=text;$('notice').className=`notice${error?' error':''}`}
-  function render(){
-    $('phase').textContent=labels[state.phase]||state.phase||'未知'
-    $('ready').textContent=state.ready?'API ready':''
-    $('dot').className=`dot ${state.phase==='error'?'error':state.phase==='running'&&state.ready?'running':''}`
-    $('pid').textContent=state.pid??'—';$('kind').textContent=state.launchKind??'—';$('url').textContent=state.url??'—';$('exit').textContent=state.exitCode??'—'
-    if (typeof state.rootPath==='string' && document.activeElement!==$('root')) $('root').value=state.rootPath
-    if (state.port && document.activeElement!==$('port')) $('port').value=String(state.port)
-    const busy=pending.size>0||['starting','stopping'].includes(state.phase)
-    $('start').disabled=busy||state.phase==='running';$('stop').disabled=busy||!['running','starting','error'].includes(state.phase);$('restart').disabled=busy||!state.rootPath
-    if(state.error)setNotice(state.error,true)
-    renderLogs()
-  }
-  function renderLogs(){
-    const box=$('logs'),atBottom=box.scrollHeight-box.scrollTop-box.clientHeight<40
-    box.textContent=''
-    const entries=Array.isArray(state.logs)?state.logs:[]
-    if(!entries.length){const empty=document.createElement('span');empty.className='empty';empty.textContent='等待 Host 日志…';box.appendChild(empty);return}
-    for(const entry of entries){const line=document.createElement('div');line.className=`line ${entry.stream||''}`;line.textContent=`[${new Date(entry.ts).toLocaleTimeString()}] ${entry.text}`;box.appendChild(line)}
-    if(atBottom)box.scrollTop=box.scrollHeight
-  }
-  api.onMessage((channel,payload)=>{
-    if(channel==='comfyui.state'&&payload&&typeof payload==='object'){state=payload;render()}
-    else if(channel==='comfyui.log'&&payload&&typeof payload==='object'){state.logs=[...(state.logs||[]),payload].slice(-1200);renderLogs()}
-    else if(channel==='comfyui.result'&&payload&&typeof payload==='object'){pending.delete(payload.requestId);setNotice(payload.message||'',!payload.ok);render()}
-  })
-  const config=()=>({rootPath:$('root').value.trim(),port:Number($('port').value)})
-  $('start').onclick=()=>request('start',config());$('stop').onclick=()=>request('stop');$('restart').onclick=()=>request('restart',config());$('clear').onclick=()=>request('clearLogs')
-  request('snapshot')
-})()
-</script>
+      <div class="status" aria-live="polite">
+        <i id="dot" class="dot"></i>
+        <strong id="phase">等待状态</strong>
+        <span id="ready" class="sub"></span>
+        <span class="agent-badge">AGENT NATIVE</span>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <div class="column">
+        <section class="panel scroll grow">
+          <div class="panel-head">
+            <div><span class="eyebrow">Runtime</span><span class="panel-title">本机服务</span></div>
+          </div>
+          <div class="panel-body">
+            <div class="field">
+              <label for="root">ComfyUI 目录</label>
+              <input id="root" spellcheck="false" placeholder="H:\ComfyUI_windows_portable">
+              <div class="hint">手动填写 portable 根目录、包含该目录的上级目录，或含 main.py 与固定 Python/venv 的目录。</div>
+            </div>
+            <div class="field">
+              <label for="port">Loopback 端口</label>
+              <input id="port" type="number" min="1024" max="65535" value="8188">
+            </div>
+            <div class="button-grid">
+              <button id="start" class="btn primary wide">启动 ComfyUI</button>
+              <button id="stop" class="btn danger">停止</button>
+              <button id="restart" class="btn">重启</button>
+            </div>
+            <div class="facts">
+              <div class="fact"><span>PID</span><b id="pid">—</b></div>
+              <div class="fact"><span>Launch</span><b id="kind">—</b></div>
+              <div class="fact"><span>API</span><b id="url">—</b></div>
+              <div class="fact"><span>Exit</span><b id="exit">—</b></div>
+            </div>
+            <div id="notice" class="notice">正在连接 Extension Host…</div>
+          </div>
+        </section>
+
+        <section class="panel terminal-panel">
+          <div class="terminal-head">
+            <span>COMFYUI HOST LOG</span>
+            <button id="clear" type="button">清空</button>
+          </div>
+          <div id="logs" class="logs"><span class="empty">等待 Host 日志…</span></div>
+        </section>
+      </div>
+
+      <section class="panel scroll">
+        <div class="panel-head">
+          <div><span class="eyebrow">Generation</span><span class="panel-title">生成控制台</span></div>
+          <div class="button-row">
+            <button id="refreshInventory" class="btn small quiet" type="button">刷新模型</button>
+            <button id="saveGeneration" class="btn small" type="button">保存参数</button>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="sync-card">
+            <div class="sync-icon">PD</div>
+            <div>
+              <strong>双向共享控制</strong>
+              <span>这里的参数会成为 PD 下一次跑图的默认值；PD 选择的新参数也会实时同步回这里。</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>工作流来源</label>
+            <div class="segmented" role="tablist" aria-label="工作流来源">
+              <button id="modeTxt2Img" class="segment active" type="button" role="tab" aria-selected="true">内置 TXT2IMG</button>
+              <button id="modeApi" class="segment" type="button" role="tab" aria-selected="false">API 工作流</button>
+            </div>
+          </div>
+
+          <div id="txt2imgFields">
+            <div class="field">
+              <label for="checkpoint">Checkpoint</label>
+              <select id="checkpoint"><option value="">等待模型清单…</option></select>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="sampler">采样器</label>
+                <select id="sampler"><option value="euler">euler</option></select>
+              </div>
+              <div class="field">
+                <label for="scheduler">调度器</label>
+                <select id="scheduler"><option value="normal">normal</option></select>
+              </div>
+            </div>
+            <div class="field-grid-4">
+              <div class="field"><label for="width">宽度</label><input id="width" type="number" min="64" max="4096" step="8" value="1024"></div>
+              <div class="field"><label for="height">高度</label><input id="height" type="number" min="64" max="4096" step="8" value="1024"></div>
+              <div class="field"><label for="steps">步数</label><input id="steps" type="number" min="1" max="150" value="20"></div>
+              <div class="field"><label for="cfg">CFG</label><input id="cfg" type="number" min=".1" max="30" step=".1" value="7"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label for="seed">种子</label><input id="seed" type="number" min="-1" value="-1"><div class="hint">-1 = 每次随机</div></div>
+              <div class="field"><label for="batchSize">批量</label><input id="batchSize" type="number" min="1" max="8" value="1"></div>
+            </div>
+            <div class="field">
+              <label for="positivePrompt">正向提示词</label>
+              <textarea id="positivePrompt" placeholder="描述主体、构图、光线、材质与风格"></textarea>
+            </div>
+            <div class="field">
+              <label for="negativePrompt">负向提示词</label>
+              <textarea id="negativePrompt" placeholder="不希望出现的内容"></textarea>
+            </div>
+          </div>
+
+          <div id="apiFields" class="hidden">
+            <div class="field">
+              <label for="workflowJson">ComfyUI API-format workflow JSON</label>
+              <textarea id="workflowJson" class="workflow" spellcheck="false" placeholder='{"1":{"class_type":"CheckpointLoaderSimple","inputs":{"ckpt_name":"..."}}}'></textarea>
+              <div class="hint">使用“保存(API 格式)”导出的节点映射，不是带 nodes/links 的画布 UI JSON。Host 会先做结构校验再提交。</div>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button id="validateWorkflow" class="btn" type="button">校验工作流</button>
+            <button id="generate" class="btn primary" type="button">进入生成队列</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="column right-column">
+        <section class="panel grow scroll">
+          <div class="panel-head">
+            <div><span class="eyebrow">Queue</span><span class="panel-title">任务与进度</span></div>
+            <button id="refreshStatus" class="btn small quiet" type="button">刷新</button>
+          </div>
+          <div class="panel-body">
+            <div id="queue" class="queue-list"><div class="empty">还没有生成任务</div></div>
+          </div>
+        </section>
+
+        <section class="panel grow scroll">
+          <div class="panel-head">
+            <div><span class="eyebrow">Outputs</span><span class="panel-title">生成结果</span></div>
+            <span id="outputCount" class="sub">0 项</span>
+          </div>
+          <div class="panel-body">
+            <div id="outputs" class="output-list"><div class="empty">完成生成后，输出会出现在这里并同步进入聊天或任务产物链。</div></div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      'use strict'
+
+      const api = window.puppyExtension
+      const $ = (id) => document.getElementById(id)
+      const labels = {
+        stopped: '已停止',
+        starting: '启动中',
+        running: '运行中',
+        stopping: '停止中',
+        error: '错误',
+      }
+      const jobLabels = {
+        queued: '排队',
+        running: '生成中',
+        finalizing: '收尾中',
+        completed: '已完成',
+        cancelled: '已取消',
+        error: '失败',
+      }
+
+      let state = {
+        phase: 'stopped',
+        ready: false,
+        logs: [],
+        jobs: [],
+        inventory: { checkpoints: [], samplers: [], schedulers: [] },
+        generation: {},
+      }
+      let draft = {}
+      let selectedPromptId = ''
+      let sequence = 0
+      const pending = new Map()
+
+      function request(action, extra = {}) {
+        if (!api) return ''
+        const requestId = `view_${Date.now().toString(36)}_${++sequence}`
+        pending.set(requestId, action)
+        renderBusy()
+        api.postMessage('comfyui.request', { requestId, action, ...extra })
+        return requestId
+      }
+
+      function setNotice(text, kind = '') {
+        const node = $('notice')
+        node.textContent = text || ''
+        node.className = `notice${kind ? ` ${kind}` : ''}`
+      }
+
+      function optionList(node, values, selected, fallback) {
+        const list = Array.isArray(values) ? values : []
+        const current = selected || fallback || ''
+        node.textContent = ''
+        if (!list.length) {
+          const option = document.createElement('option')
+          option.value = current
+          option.textContent = current || '暂无可用项'
+          node.appendChild(option)
+          node.value = current
+          return
+        }
+        for (const value of list) {
+          const option = document.createElement('option')
+          option.value = String(value)
+          option.textContent = String(value)
+          node.appendChild(option)
+        }
+        node.value = list.includes(current) ? current : list[0]
+      }
+
+      function writeIfIdle(id, value) {
+        const node = $(id)
+        if (document.activeElement !== node) node.value = value == null ? '' : String(value)
+      }
+
+      function syncDraftFromState() {
+        const incoming = state.generation && typeof state.generation === 'object'
+          ? state.generation
+          : {}
+        draft = { ...draft, ...incoming }
+        const mode = draft.workflowMode === 'api' ? 'api' : 'txt2img'
+        $('modeTxt2Img').classList.toggle('active', mode === 'txt2img')
+        $('modeApi').classList.toggle('active', mode === 'api')
+        $('modeTxt2Img').setAttribute('aria-selected', String(mode === 'txt2img'))
+        $('modeApi').setAttribute('aria-selected', String(mode === 'api'))
+        $('txt2imgFields').classList.toggle('hidden', mode !== 'txt2img')
+        $('apiFields').classList.toggle('hidden', mode !== 'api')
+
+        const inventory = state.inventory || {}
+        optionList($('checkpoint'), inventory.checkpoints, draft.checkpoint, '')
+        optionList($('sampler'), inventory.samplers, draft.sampler, 'euler')
+        optionList($('scheduler'), inventory.schedulers, draft.scheduler, 'normal')
+        writeIfIdle('width', draft.width ?? 1024)
+        writeIfIdle('height', draft.height ?? 1024)
+        writeIfIdle('steps', draft.steps ?? 20)
+        writeIfIdle('cfg', draft.cfg ?? 7)
+        writeIfIdle('seed', draft.seed ?? -1)
+        writeIfIdle('batchSize', draft.batchSize ?? 1)
+        writeIfIdle('positivePrompt', draft.positivePrompt ?? '')
+        writeIfIdle('negativePrompt', draft.negativePrompt ?? '')
+        writeIfIdle('workflowJson', draft.workflowJson ?? '')
+      }
+
+      function readParameters() {
+        return {
+          workflowMode: draft.workflowMode === 'api' ? 'api' : 'txt2img',
+          checkpoint: $('checkpoint').value,
+          sampler: $('sampler').value,
+          scheduler: $('scheduler').value,
+          width: Number($('width').value),
+          height: Number($('height').value),
+          steps: Number($('steps').value),
+          cfg: Number($('cfg').value),
+          seed: Number($('seed').value),
+          batchSize: Number($('batchSize').value),
+          positivePrompt: $('positivePrompt').value,
+          negativePrompt: $('negativePrompt').value,
+          workflowJson: $('workflowJson').value,
+        }
+      }
+
+      function renderRuntime() {
+        $('phase').textContent = labels[state.phase] || state.phase || '未知'
+        $('ready').textContent = state.ready ? 'API READY' : ''
+        $('dot').className = `dot ${
+          state.phase === 'error'
+            ? 'error'
+            : state.phase === 'running' && state.ready
+              ? 'running'
+              : ''
+        }`
+        $('pid').textContent = state.pid ?? '—'
+        $('kind').textContent = state.launchKind ?? '—'
+        $('url').textContent = state.url ?? '—'
+        $('exit').textContent = state.exitCode ?? '—'
+        writeIfIdle('root', state.rootPath ?? '')
+        writeIfIdle('port', state.port ?? 8188)
+        if (state.error) setNotice(state.error, 'error')
+      }
+
+      function renderBusy() {
+        const runtimeBusy = ['starting', 'stopping'].includes(state.phase)
+        const anyPending = pending.size > 0
+        $('start').disabled = runtimeBusy || state.phase === 'running'
+        $('stop').disabled =
+          runtimeBusy || !['running', 'starting', 'error'].includes(state.phase)
+        $('restart').disabled = runtimeBusy || !state.rootPath
+        $('refreshInventory').disabled = anyPending || !state.ready
+        $('saveGeneration').disabled = anyPending
+        $('validateWorkflow').disabled = anyPending
+        $('generate').disabled = anyPending || !state.ready
+        $('refreshStatus').disabled = anyPending || !state.ready
+
+        for (const [id, action] of [
+          ['refreshInventory', 'refreshInventory'],
+          ['validateWorkflow', 'validateWorkflow'],
+          ['generate', 'generate'],
+        ]) {
+          $(id).classList.toggle(
+            'loading',
+            [...pending.values()].includes(action),
+          )
+        }
+      }
+
+      function renderLogs() {
+        const box = $('logs')
+        const atBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 40
+        box.textContent = ''
+        const entries = Array.isArray(state.logs) ? state.logs : []
+        if (!entries.length) {
+          const empty = document.createElement('span')
+          empty.className = 'empty'
+          empty.textContent = '等待 Host 日志…'
+          box.appendChild(empty)
+          return
+        }
+        for (const entry of entries) {
+          const line = document.createElement('div')
+          line.className = `line ${entry.stream || ''}`
+          line.textContent = `[${new Date(entry.ts).toLocaleTimeString()}] ${entry.text}`
+          box.appendChild(line)
+        }
+        if (atBottom) box.scrollTop = box.scrollHeight
+      }
+
+      function activeJobs() {
+        return Array.isArray(state.jobs) ? state.jobs : []
+      }
+
+      function renderQueue() {
+        const box = $('queue')
+        box.textContent = ''
+        const jobs = activeJobs()
+        if (!jobs.length) {
+          const empty = document.createElement('div')
+          empty.className = 'empty'
+          empty.textContent = '还没有生成任务'
+          box.appendChild(empty)
+          return
+        }
+        if (!selectedPromptId) selectedPromptId = jobs[0].promptId
+        for (const job of jobs) {
+          const card = document.createElement('article')
+          card.className = `job${selectedPromptId === job.promptId ? ' active' : ''}`
+          card.tabIndex = 0
+          card.onclick = () => {
+            selectedPromptId = job.promptId
+            renderQueue()
+            renderOutputs()
+          }
+          card.onkeydown = (event) => {
+            if (event.key === 'Enter' || event.key === ' ') card.click()
+          }
+
+          const top = document.createElement('div')
+          top.className = 'job-top'
+          const id = document.createElement('span')
+          id.className = 'job-id'
+          id.textContent = job.promptId
+          id.title = job.promptId
+          const status = document.createElement('span')
+          status.className = `pill ${job.status || ''}`
+          status.textContent = jobLabels[job.status] || job.status || '未知'
+          top.append(id, status)
+          card.appendChild(top)
+
+          const progress = document.createElement('div')
+          progress.className = 'progress'
+          const bar = document.createElement('i')
+          bar.style.width = `${Math.round((Number(job.progress) || 0) * 100)}%`
+          progress.appendChild(bar)
+          card.appendChild(progress)
+
+          const meta = document.createElement('div')
+          meta.className = 'job-meta'
+          const node = document.createElement('span')
+          node.textContent = job.currentNode ? `节点 ${job.currentNode}` : '等待节点'
+          const percent = document.createElement('span')
+          percent.textContent = `${Math.round((Number(job.progress) || 0) * 100)}%`
+          meta.append(node, percent)
+          card.appendChild(meta)
+
+          if (job.error) {
+            const error = document.createElement('div')
+            error.className = 'job-error'
+            error.textContent = job.error
+            card.appendChild(error)
+          }
+
+          if (['queued', 'running', 'finalizing'].includes(job.status)) {
+            const actions = document.createElement('div')
+            actions.className = 'button-row'
+            actions.style.marginTop = '7px'
+            const cancel = document.createElement('button')
+            cancel.className = 'btn small danger'
+            cancel.type = 'button'
+            cancel.textContent = '取消任务'
+            cancel.onclick = (event) => {
+              event.stopPropagation()
+              request('cancel', { promptId: job.promptId })
+            }
+            actions.appendChild(cancel)
+            card.appendChild(actions)
+          }
+          box.appendChild(card)
+        }
+      }
+
+      function selectedJob() {
+        const jobs = activeJobs()
+        return (
+          jobs.find((job) => job.promptId === selectedPromptId) ||
+          jobs.find((job) => Array.isArray(job.outputs) && job.outputs.length) ||
+          null
+        )
+      }
+
+      function renderOutputs() {
+        const box = $('outputs')
+        box.textContent = ''
+        const job = selectedJob()
+        const outputs = job && Array.isArray(job.outputs) ? job.outputs : []
+        $('outputCount').textContent = `${outputs.length} 项`
+        if (!outputs.length) {
+          const empty = document.createElement('div')
+          empty.className = 'empty'
+          empty.textContent =
+            '完成生成后，输出会出现在这里并同步进入聊天或任务产物链。'
+          box.appendChild(empty)
+          return
+        }
+        for (const output of outputs) {
+          const card = document.createElement('article')
+          card.className = 'output-card'
+          const image = document.createElement('img')
+          image.src = output.url
+          image.alt = output.filename || 'ComfyUI output'
+          image.loading = 'lazy'
+          const copy = document.createElement('div')
+          const name = document.createElement('div')
+          name.className = 'output-name'
+          name.textContent = output.filename || '未命名输出'
+          name.title = output.filename || ''
+          const meta = document.createElement('div')
+          meta.className = 'output-meta'
+          meta.textContent = `${output.type || 'output'}${output.subfolder ? ` / ${output.subfolder}` : ''}`
+          copy.append(name, meta)
+          card.append(image, copy)
+          box.appendChild(card)
+        }
+      }
+
+      function render() {
+        renderRuntime()
+        syncDraftFromState()
+        renderBusy()
+        renderLogs()
+        renderQueue()
+        renderOutputs()
+      }
+
+      if (!api) {
+        setNotice('扩展视图桥不可用，请重新打开扩展。', 'error')
+        return
+      }
+
+      api.onMessage((channel, payload) => {
+        if (channel === 'comfyui.state' && payload && typeof payload === 'object') {
+          state = payload
+          render()
+        } else if (
+          channel === 'comfyui.log' &&
+          payload &&
+          typeof payload === 'object'
+        ) {
+          state.logs = [...(state.logs || []), payload].slice(-1200)
+          renderLogs()
+        } else if (
+          channel === 'comfyui.result' &&
+          payload &&
+          typeof payload === 'object'
+        ) {
+          pending.delete(payload.requestId)
+          setNotice(
+            payload.message || '',
+            payload.ok ? 'success' : 'error',
+          )
+          if (payload.data && payload.data.promptId) {
+            selectedPromptId = payload.data.promptId
+          }
+          renderBusy()
+        }
+      })
+
+      const runtimeConfig = () => ({
+        rootPath: $('root').value.trim(),
+        port: Number($('port').value),
+      })
+
+      $('start').onclick = () => request('start', runtimeConfig())
+      $('stop').onclick = () => request('stop')
+      $('restart').onclick = () => request('restart', runtimeConfig())
+      $('clear').onclick = () => request('clearLogs')
+      $('refreshInventory').onclick = () => request('refreshInventory')
+      $('saveGeneration').onclick = () =>
+        request('saveGeneration', { parameters: readParameters() })
+      $('validateWorkflow').onclick = () =>
+        request('validateWorkflow', { parameters: readParameters() })
+      $('generate').onclick = () =>
+        request('generate', { parameters: readParameters() })
+      $('refreshStatus').onclick = () =>
+        request('jobStatus', { promptId: selectedPromptId })
+
+      $('modeTxt2Img').onclick = () => {
+        draft.workflowMode = 'txt2img'
+        syncDraftFromState()
+      }
+      $('modeApi').onclick = () => {
+        draft.workflowMode = 'api'
+        syncDraftFromState()
+      }
+
+      for (const id of [
+        'checkpoint',
+        'sampler',
+        'scheduler',
+        'width',
+        'height',
+        'steps',
+        'cfg',
+        'seed',
+        'batchSize',
+        'positivePrompt',
+        'negativePrompt',
+        'workflowJson',
+      ]) {
+        $(id).addEventListener('change', () => {
+          draft = { ...draft, ...readParameters() }
+        })
+      }
+
+      request('snapshot')
+    })()
+  </script>
 </body>
 </html>

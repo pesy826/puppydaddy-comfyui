@@ -1,9 +1,9 @@
 {
   "manifestVersion": 1,
   "id": "com.puppydaddy.comfyui",
-  "name": "ComfyUI Control",
-  "version": "0.1.1",
-  "description": "Launch, monitor, stop, and restart a user-selected local ComfyUI instance from puppyDaddy.",
+  "name": "ComfyUI Studio",
+  "version": "0.2.0",
+  "description": "Agent-native ComfyUI studio with shared PD and manual control over models, samplers, workflows, queue progress, cancellation, and generated images.",
   "publisher": "puppydaddy",
   "license": "MIT",
   "repository": "https://github.com/pesy826/puppydaddy-comfyui",
@@ -18,6 +18,7 @@
         "title": "ComfyUI",
         "displayMode": "full",
         "entry": "src/view.html",
+        "allowLoopbackImages": true,
         "messageChannels": [
           {
             "id": "comfyui.request",
@@ -36,6 +37,140 @@
             "direction": "hostToView"
           }
         ]
+      }
+    ],
+    "agentTools": [
+      {
+        "id": "inventory",
+        "title": "读取 ComfyUI 能力",
+        "description": "读取本机 ComfyUI 的真实 API 状态、Checkpoint、采样器、调度器、可用工作流模式与当前共享默认参数。生成前可先调用以选择兼容参数。",
+        "category": "mcp",
+        "exposure": "both",
+        "requiresWorkspace": false,
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "generate",
+        "title": "ComfyUI 生成图片",
+        "description": "使用共享 ComfyUI Studio 参数生成图片并等待结果。可选内置 txt2img 模板或完整 API-format 工作流；未提供的参数沿用扩展工作台当前值。返回的图片由主进程接入聊天或后台任务可信产物链。",
+        "category": "mcp",
+        "exposure": "both",
+        "requiresWorkspace": false,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "workflow_mode": {
+              "type": "string",
+              "enum": [
+                "txt2img",
+                "api"
+              ],
+              "description": "txt2img 使用稳定内置模板；api 使用 workflow_json"
+            },
+            "prompt": {
+              "type": "string",
+              "maxLength": 2000,
+              "description": "正向提示词；txt2img 模式使用"
+            },
+            "negative_prompt": {
+              "type": "string",
+              "maxLength": 2000,
+              "description": "负向提示词"
+            },
+            "checkpoint": {
+              "type": "string",
+              "maxLength": 500,
+              "description": "Checkpoint 精确文件名；建议先读取 inventory"
+            },
+            "sampler": {
+              "type": "string",
+              "maxLength": 120,
+              "description": "采样器精确名称"
+            },
+            "scheduler": {
+              "type": "string",
+              "maxLength": 120,
+              "description": "调度器精确名称"
+            },
+            "width": {
+              "type": "integer",
+              "minimum": 64,
+              "maximum": 4096
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 64,
+              "maximum": 4096
+            },
+            "steps": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 150
+            },
+            "cfg": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 30
+            },
+            "seed": {
+              "type": "integer",
+              "minimum": -1,
+              "description": "-1 表示随机种子"
+            },
+            "batch_size": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8
+            },
+            "workflow_json": {
+              "type": "string",
+              "maxLength": 8192,
+              "description": "ComfyUI API-format workflow JSON；仅 api 模式使用"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "status",
+        "title": "查询 ComfyUI 任务",
+        "description": "查询指定 prompt_id，或列出当前 ComfyUI 队列与最近任务、进度、当前节点和输出。",
+        "category": "mcp",
+        "exposure": "both",
+        "requiresWorkspace": false,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "prompt_id": {
+              "type": "string",
+              "maxLength": 200,
+              "description": "可选；省略时返回队列和最近任务"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      {
+        "id": "cancel",
+        "title": "取消 ComfyUI 任务",
+        "description": "取消指定 prompt_id；省略时取消当前第一个正在排队或执行的 ComfyUI 任务。",
+        "category": "mcp",
+        "exposure": "both",
+        "requiresWorkspace": false,
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "prompt_id": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          "additionalProperties": false
+        }
       }
     ]
   }
